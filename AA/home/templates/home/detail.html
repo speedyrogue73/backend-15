@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <div class="d-flex flex-row justify-content align-items-start gap-4 p-2 flex-wrap">
+
+        <div class="card rounded rounded-4 p-4" >
+            <img src="{{ post.poster.url }}" alt="" class="card-img-top">
+            <h2 class="card-title h3">{{ post.title }}</h2>
+            <p class="card-body">{{ post.body }}</p>
+            <small>{{ post.user.username }}</small> --- <small>{{ post.created_at|timesince }} ago</small>
+            <form action="" method="post" novalidate>
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="ثبت نظر">
+            </form>
+            <div class="container-fluid d-flex flex-column gap-3">
+                {% for comment in comments %}
+                    <div class="d-flex flex-row-reverse gap-4 p-5 rounded rounded-3 bg-dark text-white">
+                        <div style="width: 35px; height: 35px ; box-shadow: 0 0 15px white" class="rounded rounded-circle" >
+                            {% if comment.user.avatar %}
+                                <img src="{{ comment.user.avatar.url }}" alt="" class="rounded rounded-circle" style="width: 35px; height: 35px ">
+                            {% endif %}
+                        </div>
+                        <p>
+                            {{ comment.body }}
+                        </p>
+                        <p>{{ comment.created_at|timesince }}</p>
+                        <p class="badge bg-info">{{ comment.user.username }}</p>
+                        <a href="{% url 'home:remove-comment' comment.id %}" class="btn btn-danger">حذف</a>
+                    </div>
+                    <form action="{% url 'home:reply' post.slug comment.id %}" method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <input type="submit" value="پاسخ">
+                    </form>
+                    {% for reply in comment.replies.all %}
+                        <div class="me-5 d-flex flex-row-reverse gap-4 p-5 rounded rounded-3 bg-primary text-white">
+                            <div style="width: 35px; height: 35px ; box-shadow: 0 0 15px white" class="rounded rounded-circle">
+                                {% if reply.user.avatar %}
+                                    <img src="{{ reply.user.avatar.url }}" alt="" class="rounded rounded-circle" style="width: 35px; height: 35px">
+                                {% endif %}
+                            </div>
+                            <p>
+                                {{ reply.body }}
+                            </p>
+                            <p>{{ reply.created_at|timesince }}</p>
+                            <p class="badge bg-danger">{{ reply.user.username }}</p>
+                            <div style="direction: rtl">
+                                answer to : <p>{{ reply.reply }}</p>
+                            </div>
+                            <a href="{% url 'home:remove-comment' comment.id %}" class="btn btn-danger">حذف</a>
+                        </div>
+                    {% endfor %}
+                {% empty %}
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
